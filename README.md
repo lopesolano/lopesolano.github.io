@@ -9,7 +9,13 @@
   *{box-sizing:border-box}
   body{margin:0;font-family:system-ui,Segoe UI,Arial,sans-serif;background:var(--fondo);color:var(--texto)}
   header{background:linear-gradient(90deg,var(--azul) 50%,var(--grana) 50%);color:#fff;display:flex;align-items:center;gap:16px;padding:14px 20px}
-  header img{height:64px}
+  header svg{height:64px;width:auto}
+  .bar{position:relative;height:20px;background:#d9deea;border-radius:10px;overflow:hidden;margin-top:6px}
+  .z{position:absolute;top:0;bottom:0;opacity:.6}
+  #zr{left:16.67%;width:25%;background:var(--grana)}
+  #zl{left:43.33%;width:23.33%;background:var(--azul)}
+  #mk{position:absolute;top:0;bottom:0;width:4px;background:var(--oro);left:0;transition:left .2s}
+  .leg{display:flex;justify-content:space-between;font-size:.8rem;margin-top:4px;color:#5b6785}
   header h1{margin:0;font-size:1.4rem}
   main{max-width:960px;margin:0 auto;padding:20px;display:grid;gap:20px}
   .panel{background:#fff;border-radius:10px;padding:20px;border:1px solid #d9deea}
@@ -46,6 +52,12 @@
   </section>
 
   <section class="panel">
+    <h2>Zonas del sensor</h2>
+    <div class="bar" role="img" aria-label="Posición del objeto"><div class="z" id="zr"></div><div class="z" id="zl"></div><div id="mk"></div></div>
+    <div class="leg"><span>0 cm</span><span>10–25 der.</span><span>26–40 izq.</span><span>60 cm</span></div>
+  </section>
+
+  <section class="panel">
     <h2>Modo de operación</h2>
     <div class="botones">
       <button class="modo" id="btnManual">Modo manual</button>
@@ -73,7 +85,7 @@
 </main>
 
 <script>
-const API = "https://semita-api.onrender.com";   // <-- URL de tu API (Plataforma B)
+const API = "https://semita-api.onrender.com";  // <-- URL de tu API (Plataforma B)
 const $ = id => document.getElementById(id);
 const nombres = {left:"Girando a la izquierda", right:"Girando a la derecha", stop:"Detenido"};
 let mode = "manual";
@@ -90,6 +102,7 @@ async function refresh(){
     const s = await call("/api/status");
     mode = s.mode;
     $("dist").textContent = (s.distance==null||s.distance<0) ? "---" : s.distance.toFixed(1);
+    $("mk").style.left = (s.distance>0 ? Math.min(s.distance,60)/60*100 : 0) + "%";
     $("motor").textContent = nombres[s.motor] || "--";
     $("modo").textContent = s.mode==="auto" ? "Automático" : "Manual";
     const o=$("online"); o.textContent=s.deviceOnline?"En línea":"Sin conexión"; o.className=s.deviceOnline?"on":"off";
@@ -111,3 +124,4 @@ refresh(); setInterval(refresh, 500);
 </script>
 </body>
 </html>
+
