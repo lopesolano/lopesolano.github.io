@@ -9,7 +9,13 @@
   *{box-sizing:border-box}
   body{margin:0;font-family:system-ui,Segoe UI,Arial,sans-serif;background:var(--fondo);color:var(--texto)}
   header{background:linear-gradient(90deg,var(--azul) 50%,var(--grana) 50%);color:#fff;display:flex;align-items:center;gap:16px;padding:14px 20px}
-  header img{height:64px}
+  header svg{height:64px;width:auto}
+  .bar{position:relative;height:20px;background:#d9deea;border-radius:10px;overflow:hidden;margin-top:6px}
+  .z{position:absolute;top:0;bottom:0;opacity:.6}
+  #zr{left:16.67%;width:25%;background:var(--grana)}
+  #zl{left:43.33%;width:23.33%;background:var(--azul)}
+  #mk{position:absolute;top:0;bottom:0;width:4px;background:var(--oro);left:0;transition:left .2s}
+  .leg{display:flex;justify-content:space-between;font-size:.8rem;margin-top:4px;color:#5b6785}
   header h1{margin:0;font-size:1.4rem}
   main{max-width:960px;margin:0 auto;padding:20px;display:grid;gap:20px}
   .panel{background:#fff;border-radius:10px;padding:20px;border:1px solid #d9deea}
@@ -32,17 +38,35 @@
 </head>
 <body>
 <header>
-  <img src="img/barcelona.png" alt="Escudo del F. C. Barcelona">
+  <svg viewBox="0 0 100 120" aria-label="Escudo del F. C. Barcelona" role="img">
+    <defs><clipPath id="cq"><path d="M8 8H92V62C92 92 70 108 50 116C30 108 8 92 8 62Z"/></clipPath></defs>
+    <g clip-path="url(#cq)">
+      <rect x="8" y="8" width="42" height="40" fill="#fff"/><rect x="26" y="8" width="6" height="40" fill="#d3122a"/><rect x="8" y="24" width="42" height="6" fill="#d3122a"/>
+      <rect x="50" y="8" width="42" height="40" fill="#fcd116"/>
+      <rect x="56" y="8" width="5" height="40" fill="#d3122a"/><rect x="67" y="8" width="5" height="40" fill="#d3122a"/><rect x="78" y="8" width="5" height="40" fill="#d3122a"/>
+      <rect x="8" y="48" width="84" height="70" fill="#004D98"/>
+      <rect x="22" y="48" width="14" height="70" fill="#A50044"/><rect x="50" y="48" width="14" height="70" fill="#A50044"/><rect x="78" y="48" width="14" height="70" fill="#A50044"/>
+      <rect x="8" y="44" width="84" height="12" fill="#EDBB00"/>
+      <text x="50" y="54" font-size="11" font-weight="800" text-anchor="middle" fill="#004D98" font-family="Arial,sans-serif">FCB</text>
+    </g>
+    <path d="M8 8H92V62C92 92 70 108 50 116C30 108 8 92 8 62Z" fill="none" stroke="#EDBB00" stroke-width="5"/>
+  </svg>
   <h1>Control de giro con sensor</h1>
 </header>
 <main>
   <section class="panel lectura" aria-live="polite">
-    <div class="display"><span id="dist">---</span> <small>cm</small></div>
+    <div class="display"><span id="dist">---</span> <small>m</small></div>
     <div class="estado">
       <p>Motor: <span id="motor">--</span></p>
       <p>Modo: <span id="modo">--</span></p>
       <p>Dispositivo: <span id="online">--</span></p>
     </div>
+  </section>
+
+  <section class="panel">
+    <h2>Zonas del sensor</h2>
+    <div class="bar" role="img" aria-label="Posición del objeto"><div class="z" id="zr"></div><div class="z" id="zl"></div><div id="mk"></div></div>
+    <div class="leg"><span>0 m</span><span>0.10–0.25 der.</span><span>0.26–0.40 izq.</span><span>0.60 m</span></div>
   </section>
 
   <section class="panel">
@@ -89,7 +113,8 @@ async function refresh(){
   try{
     const s = await call("/api/status");
     mode = s.mode;
-    $("dist").textContent = (s.distance==null||s.distance<0) ? "---" : s.distance.toFixed(1);
+    $("dist").textContent = (s.distance==null||s.distance<0) ? "---" : s.distance.toFixed(2);
+    $("mk").style.left = (s.distance>0 ? Math.min(s.distance,0.6)/0.6*100 : 0) + "%";
     $("motor").textContent = nombres[s.motor] || "--";
     $("modo").textContent = s.mode==="auto" ? "Automático" : "Manual";
     const o=$("online"); o.textContent=s.deviceOnline?"En línea":"Sin conexión"; o.className=s.deviceOnline?"on":"off";
